@@ -13,8 +13,8 @@ import keyboard
 # Find a connected ODrive (this will block until you connect one)
 print("finding an odrive...")
 odrv0 = odrive.find_any(#serial#);
-odrv1 = odrive.find_any(#serial#);
-odrv2 = odrive.find_any(#serial#);
+# odrv1 = odrive.find_any(#serial#);
+# odrv2 = odrive.find_any(#serial#);
 
 # Calibrate motor and wait for it to finish
 print("starting calibration...")
