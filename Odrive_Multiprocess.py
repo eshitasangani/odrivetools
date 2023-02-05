@@ -7,43 +7,36 @@ from multiprocessing import Queue, Value, Process
 
 SERIAL1 = "206534845748"
 SERIAL2 = "206A34A05748"
+SERIAL3 = ""
 
 
-# while True:
-    if keyboard.is_pressed('up'):
- 
-        odrv1.axis0.controller.input_vel = 2
+def set_Velocity(vel_current, vel_setpoint, Direction):
+    vel_ramp = vel_current
+    if(Master_drive_enable): #Only continue if the drive is enabled
+        while((odrv1.axis0.input_vel != vel_setpoint) and (odrv1.axis1.input_vel != vel_setpoint) and (odrv2.axis0.input_vel != vel_setpoint) and (odrv2.axis1.input_vel != vel_setpoint) and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
+            if (Direction = 0): #Forward
+                if  (odrv1.axis0.input_vel < vel_setpoint):
+                    odrv1.axis0.input_vel = odrv1.axis0.input_vel + 1
 
-        odrv2.axis0.controller.input_vel = 2
+                elif (odrv1.axis0.input_vel > vel_setpoint):
+                    odrv1.axis0.input_vel = odrv1.axis0.input_vel - 1
 
-        time.sleep(.5)
-    if keyboard.is_pressed('down'):
-   
-        odrv1.axis0.controller.input_vel = -2
-       
-        odrv2.axis0.controller.input_vel = -2
+                print(odrv1.axis0.input_vel)
 
-        time.sleep(.5)
-    if keyboard.is_pressed('left'):
-     
-        odrv1.axis0.controller.input_vel = -2
+            elif(Direction = 1): #Backward
+                if (odrv1.axis0.input_vel < -vel_setpoint):
+                    odrv1.axis0.input_vel = odrv1.axis0.input_vel + 1
 
-        odrv2.axis0.controller.input_vel = -2
-     
-        time.sleep(.5)
-    if keyboard.is_pressed('right'):
+                elif (odrv1.axis0.input_vel > -vel_setpoint):
+                    odrv1.axis0.input_vel = odrv1.axis0.input_vel - 1
 
-        odrv1.axis0.controller.input_vel = 2
- 
-        odrv2.axis0.controller.input_vel = 2
-       
-        time.sleep(.5)
+                print(odrv1.axis0.input_vel)
 
+            #TODO: Add the other motors
 
-   
 
 def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
-    while(run_flag):
+    while (run_flag):
         try:
             if keyboard.is_pressed('c'):
                 #Set global stop variable before calibrating, for now just set the input velocity to 0
@@ -56,7 +49,8 @@ def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
                 while (odrv1.axis0.current_state != AXIS_STATE_IDLE or odrv2.axis0.current_state != AXIS_STATE_IDLE \
                       or odrv3.axis0.current_state != AXIS_STATE_IDLE or odrv1.axis1.current_state != AXIS_STATE_IDLE or \
                       odrv2.axis1.current_state != AXIS_STATE_IDLE or odrv3.axis1.current_state != AXIS_STATE_IDLE):
-                          time.sleep(0.1)
+                          time.sleep(1)
+                          print("Calibrating...")
                 
                 #After calibrating, reset the control modes
                 odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
@@ -80,8 +74,11 @@ def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(input())
-                Master_drive_enable = 1
-                Master_Velocity = vel
+                Master_drive_enable = 1 #Enable driving
+                vel_current         = Master_Velocity
+                Master_Velocity     = vel 
+                Master_direction    = 1
+                set_Velocity(vel_current, Master_Velocity, Master_direction)
 
         except KeyboardInterrupt:
             run_flag = 0
@@ -90,7 +87,7 @@ def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
                
        
 if __name__ == '__main__':
-   
+
     run_flag            = Value('i', 1)
     enable_stop         = Value('i', 1)
     Master_Velocity     = Value('i', 0)
@@ -104,4 +101,3 @@ if __name__ == '__main__':
     odrv3 = odrive.find_any(serial_number = SERIAL3)
    
     p0 = Process(target=Master_Poll, args=(run_flag, enable_stop, Master_Velocity, Master_drive_enable))
-    p1 = Process(target=Stop_positive, args=(run_flag, enable_stop))
