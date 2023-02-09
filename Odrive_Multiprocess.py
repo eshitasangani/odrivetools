@@ -13,31 +13,34 @@ SERIAL3 = ""
 def set_Velocity(vel_current, vel_setpoint, Direction, odrv1):
     vel_ramp = vel_current
     if(Master_drive_enable): #Only continue if the drive is enabled
-        while((odrv1.axis0.input_vel != vel_setpoint) and (odrv1.axis1.input_vel != vel_setpoint)): #and (odrv2.axis0.input_vel != vel_setpoint) and (odrv2.axis1.input_vel != vel_setpoint) and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
+        while((odrv1.axis0.controller.input_vel != vel_setpoint) and (odrv1.axis1.controller.input_vel != vel_setpoint)): #and (odrv2.axis0.input_vel != vel_setpoint) and (odrv2.axis1.input_vel != vel_setpoint) and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
             if (Direction = 0): #Forward
-                if  (odrv1.axis0.input_vel < vel_setpoint):
-                    odrv1.axis0.input_vel = odrv1.axis0.input_vel + 1
+                if  (odrv1.axis0.controller.input_vel < vel_setpoint):
+                    odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel + 1
 
-                elif (odrv1.axis0.input_vel > vel_setpoint):
-                    odrv1.axis0.input_vel = odrv1.axis0.input_vel - 1
+                elif (odrv1.axis0.controller.input_vel > vel_setpoint):
+                    odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel - 1
 
-                print(odrv1.axis0.input_vel)
+                print("Ramping to : " + odrv1.axis0.controller.input_vel)
 
             elif(Direction = 1): #Backward
-                if (odrv1.axis0.input_vel < -vel_setpoint):
-                    odrv1.axis0.input_vel = odrv1.axis0.input_vel + 1
+                if (odrv1.axis0.controller.input_vel < -vel_setpoint):
+                    odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel + 1
 
-                elif (odrv1.axis0.input_vel > -vel_setpoint):
-                    odrv1.axis0.input_vel = odrv1.axis0.input_vel - 1
+                elif (odrv1.axis0.controller.input_vel > -vel_setpoint):
+                    odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel - 1
 
-                print(odrv1.axis0.input_vel)
+                print("Ramping to : " + odrv1.axis0.controller.input_vel)
+            
+            time.sleep(0.2) #Delay the ramp up by a fifth of a second
 
             #TODO: Add the other motors
 
 
 def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
-    print("Finding odrives")
+    print("Finding odrives in master poll process")
     odrv1 = odrive.find_any(serial_number = SERIAL1)
+    print("Odrive 1 Found in master poll process")
     #odrv2 = odrive.find_any(serial_number = SERIAL2)
     #odrv3 = odrive.find_any(serial_number = SERIAL3)
     while (run_flag):
@@ -72,15 +75,6 @@ def Master_Poll(run_flag, enable_stop, Master_Velocity, Master_drive_enable):
             if keyboard.is_pressed('s'):
                 enable_stop = 1
             
-            if keyboard.is_pressed('up'):
-                #Block for velocity input
-                print("Enter Velocity:")
-                vel = int(input())
-                Master_drive_enable = 1 #Enable driving
-                vel_current         = Master_Velocity
-                Master_Velocity     = vel 
-                Master_direction    = 1
-                set_Velocity(vel_current, Master_Velocity, Master_direction, odrv1=odrv1)
 
         except KeyboardInterrupt:
             run_flag = 0
@@ -96,7 +90,37 @@ if __name__ == '__main__':
     Master_drive_enable = Value('i', 0) #When this is zero, the rover should not move no matter what
     Master_direction    = Value('i', 0) #Arbitrary direction for now
 
-    p0 = Process(target=Master_Poll, args=(run_flag, enable_stop, Master_Velocity, Master_drive_enable))
+    print("Finding odrives")
+    odrv1 = odrive.find_any(serial_number = SERIAL1)
+    print("Odrive 1 Found")
 
+    p0 = Process(target=Master_Poll, args=(run_flag, enable_stop, Master_Velocity, Master_drive_enable))
+    
     p0.start()
+
+    #MAIN THREAD
+    #Only the main thread is allowed to contain requests for user input
+    while(1):
+        if keyboard.is_pressed('up'):
+            time.sleep(0.01) #Try sleeping before asking for input to remove garbage string data from the input line
+            #Block for velocity input
+            print("Enter Velocity:")
+            vel = int(input())
+            Master_drive_enable = 1 #Enable driving
+            vel_current         = Master_Velocity
+            Master_Velocity     = vel 
+            Master_direction    = 1
+            set_Velocity(vel_current, Master_Velocity, Master_direction,  odrv1=odrv1)
+        
+        if keyboard.is_pressed('down'):
+            time.sleep(0.01) #Try sleeping before asking for input to remove garbage string data from the input line
+            #Block for velocity input
+            print("Enter Velocity:")
+            vel = int(input())
+            Master_drive_enable = 1 #Enable driving
+            vel_current         = Master_Velocity
+            Master_Velocity     = vel 
+            Master_direction    = 0
+            set_Velocity(vel_current, Master_Velocity, Master_direction,  odrv1=odrv1)
+
     p0.join()
