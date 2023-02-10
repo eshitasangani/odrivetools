@@ -1,6 +1,5 @@
 import odrive
 from odrive.enums import *
-#from time import sleep
 import time
 import keyboard
 import curses
@@ -9,6 +8,7 @@ SERIAL1 = "206534845748"
 SERIAL2 = "206A34A05748"
 SERIAL3 = ""
 
+# Sets max current commanded and max current margin to the respective values for each motor
 def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
     odrv1.axis0.motor.config.current_lim        = max_current_commanded
     odrv1.axis0.motor.config.current_lim_margin = max_current_measured
@@ -22,7 +22,7 @@ def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
 
     #TODO: Add other motors
 
-
+# Sets velocity control for all motors
 def setControlModeVelocity(odrv1, odrv2):
     odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
     odrv1.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
@@ -47,7 +47,7 @@ def setControlModeVelocity(odrv1, odrv2):
     #TODO: Add other motors
 
 
-
+# Sets the velocity of each axis to the respective setpoint by ramping
 def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2):
     print("Setting Velocity....")
     while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.input_vel != vel_setpoint_axis0) and (odrv2.axis1.input_vel != vel_setpoint_axis1)): #and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
