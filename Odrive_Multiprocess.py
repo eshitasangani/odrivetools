@@ -14,6 +14,7 @@ def setCurrentLimits(max_current_commanded, max_current_measured, odrv1):
     odrv1.axis0.motor.config.current_lim_margin = max_current_measured
     odrv1.axis1.motor.config.current_lim        = max_current_commanded
     odrv1.axis1.motor.config.current_lim_margin = max_current_measured
+    #TODO: Add other motors
 
 def setControlModeVelcity():
     odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
@@ -25,6 +26,9 @@ def setControlModeVelcity():
     odrv1.axis1.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
     odrv1.axis1.controller.input_vel           = 0
     print("Odrv1 Axis1 set to velocity control")
+
+    #TODO: Add other motors
+
 
 
 def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1):
@@ -48,14 +52,20 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1):
         
         time.sleep(0.1) #Delay the ramp up by a tenth of a second
         
-            #TODO: Add the other motors
+        #TODO: Add the other motors
     print("Velocity set!")
+
+def stopDrive(odrv1):
+    set_Velocity(0,0,odrv1)
 
 if __name__ == '__main__':
 
     print("Finding odrives")
     odrv1 = odrive.find_any(serial_number = SERIAL1)
     print("Odrive 1 Found")
+
+    #TODO: Add other ODrives
+
 
     stdscr = curses.initscr()
     print("Terminal independent input initialized")
@@ -79,28 +89,32 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                set_Velocity(0, 0, odrv1)
+                if(not (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0)):
+                    stopDrive(odrv1) # Stop the motors if we are not already going forwards
                 set_Velocity(vel, vel, odrv1)
             
             if command == curses.KEY_DOWN:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                set_Velocity(0, 0, odrv1)
+                if(not (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0)):
+                    stopDrive(odrv1) # Stop the motors if we are not already going backwards
                 set_Velocity(vel*-1, vel*-1, odrv1)
             
             if command == curses.KEY_LEFT:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                set_Velocity(0, 0, odrv1)
+                if(not (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0)):
+                    stopDrive(odrv1) # Stop the motors if we are not already going left
                 set_Velocity(vel*-1, vel, odrv1)
             
             if command == curses.KEY_RIGHT:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                set_Velocity(0, 0, odrv1)
+                if(not (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0)):
+                    stopDrive(odrv1) # Stop the motors if we are not already going right
                 set_Velocity(vel, vel*-1, odrv1)
             
             if command == ord('c'):
@@ -116,6 +130,9 @@ if __name__ == '__main__':
                     while (odrv1.axis1.current_state != AXIS_STATE_IDLE):
                         time.sleep(1)
                         print("Calibrating odrv1 axis1...")
+                    
+                    #TODO: Add other motors
+
                     setControlModeVelcity()
             
             if command == ord('s'):
