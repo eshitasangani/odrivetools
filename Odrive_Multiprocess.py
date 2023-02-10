@@ -194,14 +194,14 @@ if __name__ == '__main__':
             # Stop command
             elif command == ord('s'):
                 print("Stopping motor...")
-                stopDrive(0, 0, odrv1, odrv2)
+                stopDrive(odrv1, odrv2)
             
 
             print("Looking for new command")
     
     except KeyboardInterrupt:
         # shut down 
-        stopDrive(0, 0, odrv1, odrv2)
+        stopDrive(odrv1, odrv2)
         curses.nocbreak()
         stdscr.keypad(False)
         curses.echo()
