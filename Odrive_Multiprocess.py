@@ -119,6 +119,7 @@ if __name__ == '__main__':
     
     setControlModeVelocity(odrv1, odrv2) #Set velocity control for both axis right now
 
+    # Set current limits
     print("Setting current limits to 9A commanded and 10A margin")
     setCurrentLimits(9, 10, odrv1, odrv2)
 
@@ -137,7 +138,7 @@ if __name__ == '__main__':
                 set_Velocity(vel, vel, odrv1, odrv2)
             
             #Move back
-            if command == curses.KEY_DOWN:
+            elif command == curses.KEY_DOWN:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
@@ -146,7 +147,7 @@ if __name__ == '__main__':
                 set_Velocity(vel*-1, vel*-1, odrv1, odrv2)
             
             # Move left
-            if command == curses.KEY_LEFT:
+            elif command == curses.KEY_LEFT:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
@@ -155,7 +156,7 @@ if __name__ == '__main__':
                 set_Velocity(vel*-1, vel, odrv1, odrv2)
             
             # Move right
-            if command == curses.KEY_RIGHT:
+            elif command == curses.KEY_RIGHT:
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
@@ -164,7 +165,7 @@ if __name__ == '__main__':
                 set_Velocity(vel, vel*-1, odrv1, odrv2)
             
             # Calibration command
-            if command == ord('c'):
+            elif command == ord('c'):
                 print("Attempting calibration...")
                 if(isMoving()):
                     print("Velocity is nonzero... stop all motors before calibrating")
@@ -191,7 +192,7 @@ if __name__ == '__main__':
                     setControlModeVelocity(odrv1, odrv2) #After calibration, set all motors back to velocity control
             
             # Stop command
-            if command == ord('s'):
+            elif command == ord('s'):
                 print("Stopping motor...")
                 stopDrive(0, 0, odrv1, odrv2)
             
