@@ -50,7 +50,7 @@ def setControlModeVelocity(odrv1, odrv2):
 # Sets the velocity of each axis to the respective setpoint by ramping
 def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2):
     print("Setting Velocity....")
-    while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.input_vel != vel_setpoint_axis0) and (odrv2.axis1.input_vel != vel_setpoint_axis1)): #and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
+    while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv2.axis1.controller.input_vel != vel_setpoint_axis1)): #and (odrv3.axis0.input_vel != vel_setpoint) and (odrv3.axis1.input_vel != vel_setpoint)):
         
         #Odrv1 axis0
         if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
@@ -93,9 +93,26 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2):
 def stopDrive(odrv1, odrv2):
     set_Velocity(0,0, odrv1, odrv2)
 
+#TODO: Add other motors to isMoving functions
 # Return true if any axis has a non-zero velocity
 def isMoving(odrv1, odrv2):
     return odrv1.axis0.controller.input_vel != 0 or odrv1.axis1.controller.input_vel != 0 or odrv2.axis0.controller.input_vel != 0 or odrv2.axis1.controller.input_vel != 0  
+
+# Return true if all motors have positive velocity
+def isMovingForward(odrv1, odrv2):
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel > 0)
+
+# Return true if all motors have positive velocity
+def isMovingBackward(odrv1, odrv2):
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0)
+
+# Return true if axis0 has negative velocity and axis1 has positive velocity
+def isMovingLeft(odrv1, odrv2):
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0)
+
+# Return true if axis0 has positive velocity and axis1 has negative velocity
+def isMovingRight(odrv1, odrv2):
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0)
 
 if __name__ == '__main__':
 
@@ -133,7 +150,7 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                if(not (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0)):
+                if(not isMovingForward(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going forwards
                 set_Velocity(vel, vel, odrv1, odrv2)
             
@@ -142,7 +159,7 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                if(not (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0)):
+                if(not isMovingBackward(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going backwards
                 set_Velocity(vel*-1, vel*-1, odrv1, odrv2)
             
@@ -151,7 +168,7 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                if(not (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0)):
+                if(not isMovingLeft(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going left
                 set_Velocity(vel*-1, vel, odrv1, odrv2)
             
@@ -160,14 +177,14 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
-                if(not (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0)):
+                if(not isMovingRight(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going right
                 set_Velocity(vel, vel*-1, odrv1, odrv2)
             
             # Calibration command
             elif command == ord('c'):
                 print("Attempting calibration...")
-                if(isMoving()):
+                if(isMoving(odrv1, odrv2)):
                     print("Velocity is nonzero... stop all motors before calibrating")
                 else:
                     odrv1.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
