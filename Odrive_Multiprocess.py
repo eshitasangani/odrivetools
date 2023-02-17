@@ -177,6 +177,9 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
+                while(vel > 40):
+                    print("Velocity too high, enter something lower")
+                    vel = int(stdscr.getstr(2))
                 if(not isMovingForward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going forwards
                 set_Velocity(vel*-1, vel, odrv1, odrv2, odrv3)
@@ -186,6 +189,9 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
+                while(vel > 40):
+                    print("Velocity too high, enter something lower")
+                    vel = int(stdscr.getstr(2))
                 if(not isMovingBackward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going backwards
                 set_Velocity(vel, vel*-1, odrv1, odrv2, odrv3)
@@ -195,6 +201,9 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
+                while(vel > 40):
+                    print("Velocity too high, enter something lower")
+                    vel = int(stdscr.getstr(2))
                 if(not isMovingLeft(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going left
                 set_Velocity(vel*-1, vel*-1, odrv1, odrv2, odrv3)
@@ -204,6 +213,9 @@ if __name__ == '__main__':
                 #Block for velocity input
                 print("Enter Velocity:")
                 vel = int(stdscr.getstr(2))
+                while(vel > 40):
+                    print("Velocity too high, enter something lower")
+                    vel = int(stdscr.getstr(2))
                 if(not isMovingRight(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going right
                 set_Velocity(vel, vel, odrv1, odrv2, odrv3)
