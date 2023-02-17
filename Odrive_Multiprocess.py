@@ -125,21 +125,51 @@ def stopDrive(odrv1, odrv2, odrv3):
 def isMoving(odrv1, odrv2, odrv3):
     return odrv1.axis0.controller.input_vel != 0 or odrv1.axis1.controller.input_vel != 0 or odrv2.axis0.controller.input_vel != 0 or odrv2.axis1.controller.input_vel != 0 or odrv3.axis0.controller.input_vel != 0 or odrv3.axis1.controller.input_vel != 0  
 
-# Return true if all motors have positive velocity
+# Return true if moving forward
 def isMovingForward(odrv1, odrv2, odrv3):
     return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel > 0)
 
-# Return true if all motors have positive velocity
+# Return true if moving backward
 def isMovingBackward(odrv1, odrv2, odrv3):
     return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel < 0)
 
-# Return true if axis0 has negative velocity and axis1 has positive velocity
+# Return true if moving left
 def isMovingLeft(odrv1, odrv2, odrv3):
     return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel < 0)
 
-# Return true if axis0 has positive velocity and axis1 has negative velocity
+# Return true if moving right
 def isMovingRight(odrv1, odrv2, odrv3):
     return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel > 0)
+
+# Prints the motor(s) that have current limit violations
+def checkCurrentLimitViolation(odrv1, odrv2, odrv3):
+    error = False
+    if (odrv1.axis0.motor.error == CURRENT_LIMIT_VIOLATION):
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on front axis 0")
+        error = True
+    if (odrv1.axis1.motor.error == CURRENT_LIMIT_VIOLATION):
+        error = True
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on front axis 1")
+    if (odrv2.axis0.motor.error == CURRENT_LIMIT_VIOLATION):
+        error = True
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on middle axis 0")
+    if (odrv2.axis1.motor.error == CURRENT_LIMIT_VIOLATION):
+        error = True
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on middle axis 1")
+    if (odrv3.axis0.motor.error == CURRENT_LIMIT_VIOLATION):
+        error = True
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on back axis 0")
+    if (odrv3.axis1.motor.error == CURRENT_LIMIT_VIOLATION):
+        error = True
+        stopDrive(odrv1, odrv2, odrv3)
+        print("Current limit violation on back axis 1")
+    if (not error):
+        print("No current limit violation detected")
 
 if __name__ == '__main__':
 
@@ -260,6 +290,18 @@ if __name__ == '__main__':
                 print("Stopping motor...")
                 stopDrive(odrv1, odrv2, odrv3)
             
+            # Check for current limit violations
+            elif command == ord('e'):
+                print("Checking for current limit violations....")
+                checkCurrentLimitViolation(odrv1, odrv2, odrv3)
+
+            #Error clearing command
+            elif command == ord('l'):
+                print("Clearing errors... Please calibrate")
+                odrv1.clear_errors()
+                odrv2.clear_errors()
+                odrv3.clear_errors()
+
 
             print("Looking for new command")
     
