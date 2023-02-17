@@ -4,9 +4,9 @@ import time
 import keyboard
 import curses
 
-SERIAL1 = "206534845748"
-SERIAL2 = "206A34A05748"
-SERIAL3 = "206A349E5748"
+SERIAL1 = "206534845748" #front wheels
+SERIAL2 = "206A34A05748" #middle wheels
+SERIAL3 = "206A349E5748" #back wheels
 
 # Sets max current commanded and max current margin to the respective values for each motor
 def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2, odrv3):
@@ -127,19 +127,19 @@ def isMoving(odrv1, odrv2, odrv3):
 
 # Return true if all motors have positive velocity
 def isMovingForward(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel > 0)
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel > 0)
 
 # Return true if all motors have positive velocity
 def isMovingBackward(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel < 0)
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel < 0)
 
 # Return true if axis0 has negative velocity and axis1 has positive velocity
 def isMovingLeft(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel > 0)
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel < 0)
 
 # Return true if axis0 has positive velocity and axis1 has negative velocity
 def isMovingRight(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel < 0)
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel > 0)
 
 if __name__ == '__main__':
 
@@ -179,7 +179,7 @@ if __name__ == '__main__':
                 vel = int(stdscr.getstr(2))
                 if(not isMovingForward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going forwards
-                set_Velocity(vel, vel, odrv1, odrv2, odrv3)
+                set_Velocity(vel*-1, vel, odrv1, odrv2, odrv3)
             
             #Move back
             elif command == curses.KEY_DOWN:
@@ -188,7 +188,7 @@ if __name__ == '__main__':
                 vel = int(stdscr.getstr(2))
                 if(not isMovingBackward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going backwards
-                set_Velocity(vel*-1, vel*-1, odrv1, odrv2, odrv3)
+                set_Velocity(vel, vel*-1, odrv1, odrv2, odrv3)
             
             # Move left
             elif command == curses.KEY_LEFT:
@@ -197,7 +197,7 @@ if __name__ == '__main__':
                 vel = int(stdscr.getstr(2))
                 if(not isMovingLeft(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going left
-                set_Velocity(vel*-1, vel, odrv1, odrv2, odrv3)
+                set_Velocity(vel*-1, vel*-1, odrv1, odrv2, odrv3)
             
             # Move right
             elif command == curses.KEY_RIGHT:
@@ -206,7 +206,7 @@ if __name__ == '__main__':
                 vel = int(stdscr.getstr(2))
                 if(not isMovingRight(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going right
-                set_Velocity(vel, vel*-1, odrv1, odrv2, odrv3)
+                set_Velocity(vel, vel, odrv1, odrv2, odrv3)
             
             # Calibration command
             elif command == ord('c'):
