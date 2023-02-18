@@ -171,11 +171,19 @@ def checkCurrentLimitViolation(odrv1, odrv2, odrv3):
     if (not error):
         print("No current limit violation detected")
 
+# Returns the highest measured current from all 6 motors
+def getMaxCurrentMeasured(odrv1, odrv2, odrv3):
+    return max(odrv1.axis0.motor.current_control.Iq_measured, odrv1.axis1.motor.current_control.Iq_measured, odrv2.axis0.motor.current_control.Iq_measured, odrv2.axis1.motor.current_control.Iq_measured, odrv3.axis0.motor.current_control.Iq_measured, odrv3.axis1.motor.current_control.Iq_measured)
+
+# Returns the highest commanded current from all 6 motors
+def getMaxCurrentCommanded(odrv1, odrv2, odrv3):
+    return max(odrv1.axis0.motor.current_control.Iq_setpoint, odrv1.axis1.motor.current_control.Iq_setpoint, odrv2.axis0.motor.current_control.Iq_setpoint, odrv2.axis1.motor.current_control.Iq_setpoint, odrv3.axis0.motor.current_control.Iq_setpoint, odrv3.axis1.motor.current_control.Iq_setpoint)
+
 if __name__ == '__main__':
 
     print("Finding odrives")
     odrv1 = odrive.find_any(serial_number = SERIAL1)
-    print("Odrive 1 Found")
+    print("Odrive 1 found")
 
     odrv2 = odrive.find_any(serial_number = SERIAL2)
     print("Odrive 2 found")
@@ -197,7 +205,7 @@ if __name__ == '__main__':
     print("Setting current limits to 9A commanded and 10A margin")
     setCurrentLimits(9, 10, odrv1, odrv2, odrv3)
 
-    #Main polling loop
+    # Main polling loop
     try:
         while (1):
             command = stdscr.getch() # Wait for a command
@@ -295,17 +303,27 @@ if __name__ == '__main__':
                 print("Checking for current limit violations....")
                 checkCurrentLimitViolation(odrv1, odrv2, odrv3)
 
-            #Error clearing command
+            # Error clearing command
             elif command == ord('l'):
                 print("Clearing errors... Please calibrate")
                 odrv1.clear_errors()
                 odrv2.clear_errors()
                 odrv3.clear_errors()
 
+            # Print highest measured current
+            elif command == ord('i'):
+                current = getMaxCurrentMeasured(odrv1, odrv2, odrv3)
+                print("Highest Measured Current: " + current)
+
+            # Print highest commanded current
+            elif command == ord('o'):
+                current = getMaxCurrentCommanded(odrv1, odrv2, odrv3)
+                print("Highest Commanded Current: " + current)
+
 
             print("Looking for new command")
     
-    except KeyboardInterrupt:
+    except:
         # shut down 
         stopDrive(odrv1, odrv2, odrv3)
         curses.nocbreak()
