@@ -20,7 +20,7 @@ def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
     odrv2.axis1.motor.config.current_lim_margin = max_current_measured
 
 # Sets velocity control for all motors
-def setControlModeVelocity(odrv1, odrv2, odrv3):
+def setControlModeVelocity(odrv1, odrv2):
     odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
     odrv1.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
     odrv1.axis0.controller.input_vel           = 0
@@ -45,7 +45,7 @@ def setControlModeVelocity(odrv1, odrv2, odrv3):
 # Sets the velocity of each axis to the respective setpoint by ramping
 def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2):
     print("Setting Velocity....")
-    while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv2.axis1.controller.input_vel != vel_setpoint_axis1)):
+    while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv2.axis1.controller.input_vel != vel_setpoint_axis1)):
         
         #Odrv1 axis0
         if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
@@ -82,7 +82,7 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2):
         time.sleep(0.1) #Delay the ramp up by a tenth of a second
         
     print("Velocity set!")
-
+    
 #Stops all motors by ramping down
 def stopDrive(odrv1, odrv2):
     set_Velocity(0,0, odrv1, odrv2)
@@ -199,7 +199,7 @@ if __name__ == '__main__':
                     vel = int(stdscr.getstr(2))
                 if(not isMovingLeft(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going left
-                set_Velocity(vel*-0.65, vel*-1, odrv1, odrv2)
+                set_Velocity(vel*-1, vel*2, odrv1, odrv2)
             
             # Move right
             elif command == curses.KEY_RIGHT:
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                     vel = int(stdscr.getstr(2))
                 if(not isMovingRight(odrv1, odrv2)):
                     stopDrive(odrv1, odrv2) # Stop the motors if we are not already going right
-                set_Velocity(vel, vel*0.65, odrv1, odrv2)
+                set_Velocity(vel*-2, vel, odrv1, odrv2)
             
             # Calibration command
             elif command == ord('c'):
