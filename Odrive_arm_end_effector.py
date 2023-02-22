@@ -3,26 +3,25 @@ from odrive.enums import *
 import time
 import curses
 
-SERIAL1 = "xxxx" # Elbow and shoulder joint
-SERIAL2 = 'xxxx' # Wrist
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+
+FWD = 2
+REV = 3
+
+GPIO.setup(FWD, GPIO.OUT)
+GPIO.setup(REV, GPIO.OUT)
 
 # Sets max current commanded and max current margin to the respective values for each motor
-def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
+def setCurrentLimits(max_current_commanded, max_current_measured, odrv1):
     odrv1.axis0.motor.config.current_lim        = max_current_commanded
     odrv1.axis0.motor.config.current_lim_margin = max_current_measured
 
     odrv1.axis1.motor.config.current_lim        = max_current_commanded
     odrv1.axis1.motor.config.current_lim_margin = max_current_measured
 
-    odrv2.axis0.motor.config.current_lim        = 5
-    odrv2.axis0.motor.config.current_lim_margin = 5
-
-    odrv2.axis1.motor.config.current_lim        = 5
-    odrv2.axis1.motor.config.current_lim_margin = 5
-    
-
 # Sets position control
-def setControlModePosition(odrv1, odrv2):
+def setControlModePosition(odrv1):
     odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
     odrv1.axis0.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
     odrv1.axis0.controller.input_pos           = 0
@@ -32,16 +31,6 @@ def setControlModePosition(odrv1, odrv2):
     odrv1.axis1.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
     odrv1.axis1.controller.input_pos           = 0
     print("Odrv1 Axis1 set to position control")
-
-    odrv2.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
-    odrv2.axis0.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
-    odrv2.axis0.controller.input_pos           = 0
-    print("Odrv2 Axis0 set to position control")
-
-    odrv2.axis1.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
-    odrv2.axis1.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
-    odrv2.axis1.controller.input_pos           = 0
-    print("Odrv2 Axis1 set to position control")
 
 # Returns the estimated velocity for the elbow joint. Positive is counter clockwise
 def getElbowVelocity(odrv1):
@@ -53,10 +42,8 @@ def getShoulderVelocity(odrv1):
 
 if __name__ == '__main__':
     print("Finding odrives")
-    odrv1 = odrive.find_any(serial_number = SERIAL1)
+    odrv1 = odrive.find_any()
     print("odrv1 found")
-    odrv2 = odrive.find_any(serial_number = SERIAL2)
-    print("odrv2 found")
 
     stdscr = curses.initscr()
     print("Terminal independent input initialized")
@@ -71,7 +58,7 @@ if __name__ == '__main__':
 
     # Set current limits
     print("Setting current limits to 9A commanded and 10A margin")
-    setCurrentLimits(9, 10, odrv1, odrv2)
+    setCurrentLimits(9, 10, odrv1)
     current_axis = 0
     try:
         while(1):
@@ -88,17 +75,9 @@ if __name__ == '__main__':
                 while (odrv1.axis1.current_state != AXIS_STATE_IDLE):
                         time.sleep(1)
                         print("Calibrating odrv1 axis1...")
-                odrv2.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-                while (odrv2.axis0.current_state != AXIS_STATE_IDLE):
-                        time.sleep(1)
-                        print("Calibrating odrv2 axis0...")
-                odrv2.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-                while (odrv2.axis1.current_state != AXIS_STATE_IDLE):
-                        time.sleep(1)
-                        print("Calibrating odrv2 axis1...")
                 
                 # After calibration, set position control again
-                setControlModePosition(odrv1, odrv2)
+                setControlModePosition(odrv1)
             
             elif command == ord('e'):
                 print("Setting control to elbow joint...")
@@ -107,51 +86,28 @@ if __name__ == '__main__':
             elif command == ord('s'):
                 print("Setting control to shoulder joint...")
                 current_axis = 1
-            
-            elif command == ord('w'):
-                print("Choose wrist tilt (t) or rotate (r)...")
-                wrist = stdscr.getch() # Wait for a command
-                if (wrist == ord('t')):
-                    print ("Setting control to wrist tilt")
-                    current_axis = 2
-                elif (wrist == ord('r')):
-                    print("Setting control to wrist rotate")
-                    current_axis = 3
-                else :
-                    print("Enter a valid wrist axis")
-
 
             elif command == curses.KEY_LEFT:
-                # Elbow
-                if (current_axis == 0): 
-                    while(getElbowVelocity(odrv1) != 0):
-                        print("Waiting for joint to complete previous movement")
+                if (current_axis == 0):
+                    # while(getElbowVelocity(odrv1) != 0):
+                    #     print("Waiting for joint to complete previous movement")
                     print("Increasing position CCW...")
                     odrv1.axis0.controller.input_pos = odrv1.axis0.controller.input_pos + 1
-                # Shoulder
                 elif (current_axis == 1):
-                    while(getShoulderVelocity(odrv1) != 0):
-                        print("Waiting for joint to complete previous movement")
+                    # while(getShoulderVelocity(odrv1) != 0):
+                    #     print("Waiting for joint to complete previous movement")
                     print("Increasing position CCW...")
                     odrv1.axis1.controller.input_pos = odrv1.axis1.controller.input_pos - 1
-                # Wrist tilt
-                elif (current_axis == 2):
-                    while(getWristTiltVelocity(odrv1) != 0):
-                        print("Waiting for joint to complete previous movement")
-                    print("Increasing position CCW...")
-                    odrv1.axis0.controller.input_pos = odrv1.axis0.controller.input_pos - 1
             
             elif command == curses.KEY_RIGHT:
-                # Elbow
                 if (current_axis == 0):
-                    while(getElbowVelocity(odrv1) != 0):
-                        print("Waiting for joint to complete previous movement")
+                    # while(getElbowVelocity(odrv1) != 0):
+                    #     print("Waiting for joint to complete previous movement")
                     print("Increasing position CCW...")
                     odrv1.axis0.controller.input_pos = odrv1.axis0.controller.input_pos - 1
-                # Shoulder
                 elif (current_axis == 1):
-                    while(getShoulderVelocity(odrv1) != 0):
-                        print("Waiting for joint to complete previous movement")
+                    # while(getShoulderVelocity(odrv1) != 0):
+                    #     print("Waiting for joint to complete previous movement")
                     print("Increasing position CCW...")
                     odrv1.axis1.controller.input_pos = odrv1.axis1.controller.input_pos + 1
 
@@ -169,10 +125,27 @@ if __name__ == '__main__':
                 print("Setting positions")
                 odrv1.axis0.controller.input_pos = e_pos
                 odrv1.axis1.controller.input_pos = s_pos
+
+            elif command == ord('i'):
+                print("Opening end effector.")
+                GPIO.output(FWD, GPIO.HIGH)
+                GPIO.output(REV, GPIO.LOW)
+            
+            elif command == ord('o'):
+                print("Closing end effector.")
+                GPIO.output(FWD, GPIO.LOW)
+                GPIO.output(REV, GPIO.HIGH)
+
+            elif command == ord('p'):
+                print("Stopping end effector.")
+                GPIO.output(FWD, GPIO.LOW)
+                GPIO.output(REV, GPIO.LOW)
             
             print("Looking for new command")
 
     except KeyboardInterrupt:
+        GPIO.output(FWD, GPIO.LOW)
+        GPIO.output(REV, GPIO.LOW)
         odrv1.axis0.controller.input_pos = 0
         odrv1.axis1.controller.input_pos = 0
         curses.nocbreak()
