@@ -81,18 +81,18 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2, odrv3):
             odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel - 1
         
         #Odrv2 axis0
-        if   (odrv2.axis0.controller.input_vel < vel_setpoint_axis0): 
+        if   (odrv2.axis0.controller.input_vel < vel_setpoint_axis1): 
             print("Increasing odrv2 axis0")
             odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel + 1
-        elif (odrv2.axis0.controller.input_vel > vel_setpoint_axis0):
+        elif (odrv2.axis0.controller.input_vel > vel_setpoint_axis1):
             print("Decreasing odrv2 axis0")
             odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel - 1
         
         #Odrv2 axis1
-        if   (odrv2.axis1.controller.input_vel < vel_setpoint_axis1):
+        if   (odrv2.axis1.controller.input_vel < vel_setpoint_axis0):
             print("Increasing odrv2 axis1")
             odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel + 1
-        elif (odrv2.axis1.controller.input_vel > vel_setpoint_axis1):
+        elif (odrv2.axis1.controller.input_vel > vel_setpoint_axis0):
             print("Decreasing odrv2 axis1")
             odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel - 1
         
@@ -127,19 +127,19 @@ def isMoving(odrv1, odrv2, odrv3):
 
 # Return true if moving forward
 def isMovingForward(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel > 0)
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel > 0)
 
 # Return true if moving backward
 def isMovingBackward(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel < 0)
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel < 0)
 
 # Return true if moving left
 def isMovingLeft(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel < 0)
+    return (odrv1.axis0.controller.input_vel < 0 and odrv1.axis1.controller.input_vel < 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel < 0 and odrv3.axis1.controller.input_vel < 0)
 
 # Return true if moving right
 def isMovingRight(odrv1, odrv2, odrv3):
-    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel > 0 and odrv2.axis1.controller.input_vel > 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel > 0)
+    return (odrv1.axis0.controller.input_vel > 0 and odrv1.axis1.controller.input_vel > 0 and odrv2.axis0.controller.input_vel < 0 and odrv2.axis1.controller.input_vel < 0 and odrv3.axis0.controller.input_vel > 0 and odrv3.axis1.controller.input_vel > 0)
 
 # Prints the motor(s) that have current limit violations
 def checkCurrentLimitViolation(odrv1, odrv2, odrv3):
