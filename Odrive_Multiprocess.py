@@ -3,6 +3,15 @@ from odrive.enums import *
 import time
 import keyboard
 import curses
+import serial
+
+try:
+	usb = serial.Serial("/dev/ttyACM0", 9600, timeout=1)
+	usb.reset_input_buffer()
+except:
+	print("ERROR - Could not open serial port.")
+	print("exit")
+	exit()
 
 SERIAL1 = "206534845748" #front wheels
 SERIAL2 = "206A34A05748" #middle wheels
@@ -60,60 +69,111 @@ def setControlModeVelocity(odrv1, odrv2, odrv3):
 
 
 # Sets the velocity of each axis to the respective setpoint by ramping
-def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2, odrv3):
+def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2, odrv3, swing_turn):
     print("Setting Velocity....")
-    while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv2.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv3.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv3.axis1.controller.input_vel != vel_setpoint_axis1)):
-        
-        #Odrv1 axis0
-        if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
-            print("Increasing odrv1 axis0")
-            odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel + 1
-        elif (odrv1.axis0.controller.input_vel > vel_setpoint_axis0):
-            print("Decreasing odrv1 axis0")
-            odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel - 1
-        
-        #Odrv1 axis1
-        if   (odrv1.axis1.controller.input_vel < vel_setpoint_axis1):
-            print("Increasing odrv1 axis1")
-            odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel + 1
-        elif (odrv1.axis1.controller.input_vel > vel_setpoint_axis1):
-            print("Decreasing odrv1 axis1")
-            odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel - 1
-        
-        #Odrv2 axis0
-        if   (odrv2.axis0.controller.input_vel < vel_setpoint_axis1): 
-            print("Increasing odrv2 axis0")
-            odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel + 1
-        elif (odrv2.axis0.controller.input_vel > vel_setpoint_axis1):
-            print("Decreasing odrv2 axis0")
-            odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel - 1
-        
-        #Odrv2 axis1
-        if   (odrv2.axis1.controller.input_vel < vel_setpoint_axis0):
-            print("Increasing odrv2 axis1")
-            odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel + 1
-        elif (odrv2.axis1.controller.input_vel > vel_setpoint_axis0):
-            print("Decreasing odrv2 axis1")
-            odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel - 1
-        
-        #Odrv3 axis0
-        if   (odrv3.axis0.controller.input_vel < vel_setpoint_axis0):
-            print("Increasing odrv3 axis0")
-            odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel + 1
-        elif (odrv3.axis0.controller.input_vel > vel_setpoint_axis0):
-            print("Decreasing odrv3 axis0")
-            odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel - 1
+    if (not swing_turn):
+        while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv2.axis1.controller.input_vel != vel_setpoint_axis1) and (odrv3.axis0.controller.input_vel != vel_setpoint_axis0) and (odrv3.axis1.controller.input_vel != vel_setpoint_axis1)):
+            
+            #Odrv1 axis0
+            if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
+                print("Increasing odrv1 axis0")
+                odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel + 1
+            elif (odrv1.axis0.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv1 axis0")
+                odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel - 1
+            
+            #Odrv1 axis1
+            if   (odrv1.axis1.controller.input_vel < vel_setpoint_axis1):
+                print("Increasing odrv1 axis1")
+                odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel + 1
+            elif (odrv1.axis1.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv1 axis1")
+                odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel - 1
+            
+            #Odrv2 axis0
+            if   (odrv2.axis0.controller.input_vel < vel_setpoint_axis1): 
+                print("Increasing odrv2 axis0")
+                odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel + 1
+            elif (odrv2.axis0.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv2 axis0")
+                odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel - 1
+            
+            #Odrv2 axis1
+            if   (odrv2.axis1.controller.input_vel < vel_setpoint_axis0):
+                print("Increasing odrv2 axis1")
+                odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel + 1
+            elif (odrv2.axis1.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv2 axis1")
+                odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel - 1
+            
+            #Odrv3 axis0
+            if   (odrv3.axis0.controller.input_vel < vel_setpoint_axis0):
+                print("Increasing odrv3 axis0")
+                odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel + 1
+            elif (odrv3.axis0.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv3 axis0")
+                odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel - 1
 
-        #Odrv3 axis1
-        if   (odrv3.axis1.controller.input_vel < vel_setpoint_axis1):
-            print("Increasing odrv3 axis0")
-            odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel + 1
-        elif (odrv3.axis1.controller.input_vel > vel_setpoint_axis1):
-            print("Decreasing odrv3 axis1")
-            odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel - 1
-        
-        
-        time.sleep(0.1) #Delay the ramp up by a tenth of a second
+            #Odrv3 axis1
+            if   (odrv3.axis1.controller.input_vel < vel_setpoint_axis1):
+                print("Increasing odrv3 axis0")
+                odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel + 1
+            elif (odrv3.axis1.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv3 axis1")
+                odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel - 1
+            
+            time.sleep(0.1) # Delay the ramp up by a tenth of a second
+    else:
+        while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv2.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv3.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv3.axis1.controller.input_vel != vel_setpoint_axis1)):
+            #Odrv1 axis0
+            if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
+                print("Increasing odrv1 axis0")
+                odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel + 1
+            elif (odrv1.axis0.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv1 axis0")
+                odrv1.axis0.controller.input_vel = odrv1.axis0.controller.input_vel - 1
+            
+            #Odrv1 axis1
+            if   (odrv1.axis1.controller.input_vel < vel_setpoint_axis1):
+                print("Increasing odrv1 axis1")
+                odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel + 1
+            elif (odrv1.axis1.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv1 axis1")
+                odrv1.axis1.controller.input_vel = odrv1.axis1.controller.input_vel - 1
+            
+            #Odrv2 axis0
+            if   (odrv2.axis0.controller.input_vel < vel_setpoint_axis1): 
+                print("Increasing odrv2 axis0")
+                odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel + 1
+            elif (odrv2.axis0.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv2 axis0")
+                odrv2.axis0.controller.input_vel = odrv2.axis0.controller.input_vel - 1
+            
+            #Odrv2 axis1
+            if   (odrv2.axis1.controller.input_vel < vel_setpoint_axis0):
+                print("Increasing odrv2 axis1")
+                odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel + 1
+            elif (odrv2.axis1.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv2 axis1")
+                odrv2.axis1.controller.input_vel = odrv2.axis1.controller.input_vel - 1
+            
+            #Odrv3 axis0
+            if   (odrv3.axis0.controller.input_vel < vel_setpoint_axis0):
+                print("Increasing odrv3 axis0")
+                odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel + 1
+            elif (odrv3.axis0.controller.input_vel > vel_setpoint_axis0):
+                print("Decreasing odrv3 axis0")
+                odrv3.axis0.controller.input_vel = odrv3.axis0.controller.input_vel - 1
+
+            #Odrv3 axis1
+            if   (odrv3.axis1.controller.input_vel < vel_setpoint_axis1):
+                print("Increasing odrv3 axis0")
+                odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel + 1
+            elif (odrv3.axis1.controller.input_vel > vel_setpoint_axis1):
+                print("Decreasing odrv3 axis1")
+                odrv3.axis1.controller.input_vel = odrv3.axis1.controller.input_vel - 1
+            
+            time.sleep(0.1) # Delay the ramp up by a tenth of a second
         
     print("Velocity set!")
 
@@ -210,6 +270,26 @@ if __name__ == '__main__':
         while (1):
             command = stdscr.getch() # Wait for a command
 
+            ## LED COMMANDS
+            if command == ord('r'):
+                usb.write(b'RED')
+                print("RED SET")
+            elif command == ord('g'):
+                usb.write(b'GREEN')
+                print("GREEN SET")
+            elif command == ord('b'):
+                print("BLUE SET")
+                usb.write(b'BLUE')
+            elif command == ord('p'):
+                print("OFF SET")
+                usb.write(b'OFF')
+            elif command == ord('f'):
+                print("FLASH SET")
+                usb.write(b'FLASH')
+            elif command == ord('d'):
+                print("SOLID SET")
+                usb.write(b'SOLID')
+
             #Move forward
             if command == curses.KEY_UP:
                 #Block for velocity input
@@ -236,28 +316,58 @@ if __name__ == '__main__':
             
             # Move left
             elif command == curses.KEY_LEFT:
-                #Block for velocity input
-                print("Enter Velocity:")
-                vel = int(stdscr.getstr(2))
-                while(vel > 40):
-                    print("Velocity too high, enter something lower")
+                print("Enter turn type (p = point, w=swing)")
+                turn_type = stdscr.getch()
+                if (turn_type == ord('w')):
+                    #Block for velocity input
+                    print("Enter Velocity:")
                     vel = int(stdscr.getstr(2))
-                if(not isMovingLeft(odrv1, odrv2, odrv3)):
+                    while(vel > 40):
+                        print("Velocity too high, enter something lower")
+                        vel = int(stdscr.getstr(2))
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going left
-                set_Velocity(vel*-1, vel*-1, odrv1, odrv2, odrv3)
-            
+                    set_Velocity(vel*-1, vel*2, odrv1, odrv2, odrv3, True)
+                elif (turn_type == ord('p')):
+                    #Block for velocity input
+                    print("Enter Velocity:")
+                    vel = int(stdscr.getstr(2))
+                    while(vel > 40):
+                        print("Velocity too high, enter something lower")
+                        vel = int(stdscr.getstr(2))
+                    if(not isMovingLeft(odrv1, odrv2, odrv3)):
+                        stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going left
+                    set_Velocity(vel*-1, vel*-1, odrv1, odrv2, odrv3, False)
+                else:
+                    print("Try again with a valid turn type")
+                
             # Move right
             elif command == curses.KEY_RIGHT:
-                #Block for velocity input
-                print("Enter Velocity:")
-                vel = int(stdscr.getstr(2))
-                while(vel > 40):
-                    print("Velocity too high, enter something lower")
+                print("Enter turn type (p = point, w=swing)")
+                turn_type = stdscr.getch()
+                print("Enter turn type (p = point, w=swing)")
+                turn_type = stdscr.getch()
+                if (turn_type == ord('w')):
+                    #Block for velocity input
+                    print("Enter Velocity:")
                     vel = int(stdscr.getstr(2))
-                if(not isMovingRight(odrv1, odrv2, odrv3)):
+                    while(vel > 40):
+                        print("Velocity too high, enter something lower")
+                        vel = int(stdscr.getstr(2))
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going right
-                set_Velocity(vel, vel, odrv1, odrv2, odrv3)
-            
+                    set_Velocity(vel*-2, vel, odrv1, odrv2, odrv3, True)
+                elif (turn_type == ord('p')):
+                    #Block for velocity input
+                    print("Enter Velocity:")
+                    vel = int(stdscr.getstr(2))
+                    while(vel > 40):
+                        print("Velocity too high, enter something lower")
+                        vel = int(stdscr.getstr(2))
+                    if(not isMovingLeft(odrv1, odrv2, odrv3)):
+                        stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going left
+                    set_Velocity(vel, vel, odrv1, odrv2, odrv3, False)
+                else:
+                    print("Try again with a valid turn type")
+                
             # Calibration command
             elif command == ord('c'):
                 print("Attempting calibration...")
