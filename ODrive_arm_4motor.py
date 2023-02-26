@@ -24,7 +24,7 @@ GPIO.setup(REV, GPIO.OUT)
 
 SERIAL1 = "206534845748" #front wheels
 SERIAL2 = "206A349E5748" #back wheels
-SERIAL3 = "" #Main arm
+SERIAL3 = "206A34A05748" #Main arm
 SERIAL4 = "" #Wrist
 
 # Sets max current commanded and max current margin to the respective values for each motor
@@ -39,15 +39,15 @@ def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
     odrv2.axis1.motor.config.current_lim        = max_current_commanded
     odrv2.axis1.motor.config.current_lim_margin = max_current_measured
 
-    odrv3.axis0.motor.config.current_lim        = 5
-    odrv3.axis0.motor.config.current_lim_margin = 5
-    odrv3.axis1.motor.config.current_lim        = 5
-    odrv3.axis1.motor.config.current_lim_margin = 5
+    odrv3.axis0.motor.config.current_lim        = 8
+    odrv3.axis0.motor.config.current_lim_margin = 8
+    odrv3.axis1.motor.config.current_lim        = 8
+    odrv3.axis1.motor.config.current_lim_margin = 8
 
-    odrv4.axis0.motor.config.current_lim        = 5
-    odrv4.axis0.motor.config.current_lim_margin = 5
-    odrv4.axis1.motor.config.current_lim        = 5
-    odrv4.axis1.motor.config.current_lim_margin = 5
+    odrv4.axis0.motor.config.current_lim        = 8
+    odrv4.axis0.motor.config.current_lim_margin = 8
+    odrv4.axis1.motor.config.current_lim        = 8
+    odrv4.axis1.motor.config.current_lim_margin = 8
 
 # Sets velocity control for all motors
 def setControlMode(odrv1, odrv2, odrv3, odrv4):
@@ -82,14 +82,14 @@ def setControlMode(odrv1, odrv2, odrv3, odrv4):
     print("Odrv3 Axis1 set to position control")
 
     odrv4.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
-    odrv4.axis0.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
-    odrv4.axis0.controller.input_pos           = 0
-    print("Odrv4 Axis0 set to position control")
+    odrv4.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+    odrv4.axis0.controller.input_vel           = 0
+    print("Odrv4 Axis0 set to velocity control")
 
     odrv4.axis1.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
-    odrv4.axis1.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
-    odrv4.axis1.controller.input_pos           = 0
-    print("Odrv3 Axis1 set to position control")
+    odrv4.axis1.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+    odrv4.axis1.controller.input_vel           = 0
+    print("Odrv4 Axis1 set to velocity control")
 
 
 # Sets the velocity of each axis to the respective setpoint by ramping
@@ -224,14 +224,14 @@ def getMaxCurrentMeasured(odrv1, odrv2):
 def getMaxCurrentCommanded(odrv1, odrv2):
     return max(odrv1.axis0.motor.current_control.Iq_setpoint, odrv1.axis1.motor.current_control.Iq_setpoint, odrv2.axis0.motor.current_control.Iq_setpoint, odrv2.axis1.motor.current_control.Iq_setpoint)
 
-CONTROL_DRIVES = True
-CONTROL_ARM = False
-CONTROL_ARM_MAIN = False
-CONTROL_ARM_WRIST = False
+CONTROL_DRIVES       = True
+CONTROL_ARM          = False
+CONTROL_ARM_MAIN     = False
+CONTROL_ARM_WRIST    = False
 CONTROL_ARM_SHOULDER = False
-CONTROL_ARM_ELBOW = False
-CONTROL_ARM_TILT = False
-CONTROL_ARM_ROTATE = False
+CONTROL_ARM_ELBOW    = False
+CONTROL_ARM_TILT     = False
+CONTROL_ARM_ROTATE   = False
 
 if __name__ == '__main__':
 
@@ -268,7 +268,7 @@ if __name__ == '__main__':
         while (1):
             command = stdscr.getch() # Wait for a command
 
-             ## LED COMMANDS
+            ## LED COMMANDS
             # if command == ord('r'):
             #     usb.write(b'RED')
             #     print("RED SET")
@@ -358,10 +358,10 @@ if __name__ == '__main__':
                     elif(CONTROL_ARM_WRIST):
                         if(CONTROL_ARM_TILT):
                             print("Increasing position CCW...")
-                            odrv4.axis0.controller.input_pos = odrv4.axis0.controller.input_pos + 1 # TODO: Check if the directions match
+                            odrv4.axis1.controller.input_vel = 4 
                         elif(CONTROL_ARM_ROTATE):
                             print("Increasing position CCW...")
-                            odrv4.axis1.controller.input_pos = odrv4.axis1.controller.input_pos + 1 # TODO: Check if the directions match
+                            odrv4.axis0.controller.input_vel = 4 
                         else:
                             print("Please set control to tilt or rotate!")    
                     else:
@@ -407,10 +407,10 @@ if __name__ == '__main__':
                     elif(CONTROL_ARM_WRIST):
                         if(CONTROL_ARM_TILT):
                             print("Increasing position CW...")
-                            odrv4.axis0.controller.input_pos = odrv4.axis0.controller.input_pos - 1 # TODO: Check if the directions match
+                            odrv4.axis1.controller.input_vel = -4 # TODO: Check if the directions match
                         elif(CONTROL_ARM_ROTATE):
                             print("Increasing position CW...")
-                            odrv4.axis1.controller.input_pos = odrv4.axis1.controller.input_pos - 1 # TODO: Check if the directions match
+                            odrv4.axis0.controller.input_vel = -4 # TODO: Check if the directions match
                         else:
                             print("Please set control to tilt or rotate!")    
                     else:
@@ -464,43 +464,47 @@ if __name__ == '__main__':
                 print("Choose Drives (d) or Arm (a)")
                 CONTROL = stdscr.getch()
                 if(CONTROL == ord('d')):
-                    CONTROL_DRIVES = True
-                    CONTROL_ARM = False
+                    CONTROL_DRIVES    = True
+                    CONTROL_ARM       = False
                     CONTROL_ARM_WRIST = False
-                    CONTROL_ARM_MAIN = False
+                    CONTROL_ARM_MAIN  = False
                     print("Drives control set")
                 elif(CONTROL == ord('a')):
                     print("Choose Main arm (m) or wrist (w)")
-                    CONTROL_ARM = True
+                    CONTROL_ARM    = True
                     CONTROL_DRIVES = False
                     CONTROL = stdscr.getch()
                     if(CONTROL == ord('m')):
-                        CONTROL_ARM_MAIN = True
+                        CONTROL_ARM_MAIN  = True
                         CONTROL_ARM_WRIST = False
                         print("Setting control to main arm")
                     elif(CONTROL == ord('w')):
                         CONTROL_ARM_WRIST = True
-                        CONTROL_ARM_MAIN = False
+                        CONTROL_ARM_MAIN  = False
                         print("Setting control to wrist")
                     else:
-                        CONTROL_ARM_MAIN = False
+                        CONTROL_ARM_MAIN  = False
                         CONTROL_ARM_WRIST = False
-                        CONTROL_ARM = False
-                        CONTROL_DRIVES = True
+                        CONTROL_ARM       = False
+                        CONTROL_DRIVES    = True
                         print("Invalid control mode entered, setting control to drives")
                 else:
-                    CONTROL_ARM_MAIN = False
+                    CONTROL_ARM_MAIN  = False
                     CONTROL_ARM_WRIST = False
-                    CONTROL_ARM = False
-                    CONTROL_DRIVES = True
+                    CONTROL_ARM       = False
+                    CONTROL_DRIVES    = True
                     print("Invalid control mode entered, setting control to drives")
 
             # Stop command or set to shoulder
             elif command == ord('s'):
                 if(CONTROL_ARM and CONTROL_ARM_MAIN):
                     CONTROL_ARM_SHOULDER = True
-                    CONTROL_ARM_ELBOW = False
+                    CONTROL_ARM_ELBOW    = False
                     print("Setting control to arm shoulder")
+                elif(CONTROL_ARM and CONTROL_ARM_WRIST):
+                    odrv4.axis0.controller.input_vel = 0
+                    odrv4.axis1.controller.input_vel = 0
+                    print("Stopping wrist")
                 else:
                     print("Stopping motor...")
                     stopDrive(odrv1, odrv2)
@@ -508,7 +512,7 @@ if __name__ == '__main__':
             # Set control to elbow
             elif command == ord('e'):
                 if(CONTROL_ARM and CONTROL_ARM_MAIN):
-                    CONTROL_ARM_ELBOW = True
+                    CONTROL_ARM_ELBOW    = True
                     CONTROL_ARM_SHOULDER = False
                     print("Setting control to arm elbow")
                 else:
@@ -517,7 +521,7 @@ if __name__ == '__main__':
             # Set control to wrist tilt
             elif command == ord('t'):
                 if(CONTROL_ARM and CONTROL_ARM_WRIST):
-                    CONTROL_ARM_TILT = True
+                    CONTROL_ARM_TILT   = True
                     CONTROL_ARM_ROTATE = False
                     print("Setting control to wrist tilt")
                 else:
@@ -526,7 +530,7 @@ if __name__ == '__main__':
             # Setting control to wrist rotate
             elif command == ord('r'):
                 if(CONTROL_ARM and CONTROL_ARM_ROTATE):
-                    CONTROL_ARM_TILT = False
+                    CONTROL_ARM_TILT   = False
                     CONTROL_ARM_ROTATE = True
                     print("Setting control to wrist rotate")
                 else:
@@ -562,6 +566,8 @@ if __name__ == '__main__':
     
     except:
         # shut down 
+        odrv4.axis0.controller.input_vel = 0
+        odrv4.axis1.controller.input_vel = 0
         stopDrive(odrv1, odrv2)
         curses.nocbreak()
         stdscr.keypad(False)

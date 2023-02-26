@@ -21,6 +21,11 @@ def setCurrentLimits(max_current_commanded, max_current_measured, odrv1, odrv2):
     odrv2.axis1.motor.config.current_lim_margin = 5
     
 
+odrv0.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
+odrv0.axis0.controller.config.control_mode = CONTROL_MODE_VELOCITY_CONTROL
+odrv0.axis0.controller.input_vel          = 0
+    
+
 # Sets position control
 def setControlModePosition(odrv1, odrv2):
     odrv1.axis0.requested_state                = AXIS_STATE_CLOSED_LOOP_CONTROL
@@ -140,6 +145,7 @@ if __name__ == '__main__':
                         print("Waiting for joint to complete previous movement")
                     print("Increasing position CCW...")
                     odrv1.axis0.controller.input_pos = odrv1.axis0.controller.input_pos - 1
+                # TODO: Add wrist rotate here and add the rest of the wrist elsewhere
             
             elif command == curses.KEY_RIGHT:
                 # Elbow
