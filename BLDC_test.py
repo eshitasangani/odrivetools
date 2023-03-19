@@ -65,7 +65,7 @@ if __name__ == '__main__':
             if(DutyCycle + 1 <= 100):
                 DutyCycle = DutyCycle + 1
                 p.ChangeDutyCycle(DutyCycle)
-                print("Increasing duty cycle")
+                print("Increasing duty cycle to", DutyCycle)
             else:
                 print("Duty Cycle already at max!")
         
@@ -73,7 +73,7 @@ if __name__ == '__main__':
             if(DutyCycle - 1 >= 0):
                 DutyCycle = DutyCycle - 1
                 p.ChangeDutyCycle(DutyCycle)
-                print("Decreasing duty cycle")
+                print("Decreasing duty cycle to", DutyCycle)
             else:
                 print("Duty cycle already at minimum!")
         else:
