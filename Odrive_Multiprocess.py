@@ -124,7 +124,7 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2, odrv3, sw
             
             time.sleep(0.1) # Delay the ramp up by a tenth of a second
     else:
-        while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv2.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv2.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv3.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv3.axis1.controller.input_vel != vel_setpoint_axis1)):
+        while((odrv1.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv1.axis1.controller.input_vel != vel_setpoint_axis1) or (odrv2.axis0.controller.input_vel != vel_setpoint_axis1) or (odrv2.axis1.controller.input_vel != vel_setpoint_axis0) or (odrv3.axis0.controller.input_vel != vel_setpoint_axis0) or (odrv3.axis1.controller.input_vel != vel_setpoint_axis1)):
             #Odrv1 axis0
             if   (odrv1.axis0.controller.input_vel < vel_setpoint_axis0): 
                 print("Increasing odrv1 axis0")
@@ -179,7 +179,7 @@ def set_Velocity(vel_setpoint_axis0, vel_setpoint_axis1, odrv1, odrv2, odrv3, sw
 
 #Stops all motors by ramping down
 def stopDrive(odrv1, odrv2, odrv3):
-    set_Velocity(0,0, odrv1, odrv2, odrv3)
+    set_Velocity(0,0, odrv1, odrv2, odrv3, True)
 
 # Return true if any axis has a non-zero velocity
 def isMoving(odrv1, odrv2, odrv3):
@@ -300,7 +300,7 @@ if __name__ == '__main__':
                     vel = int(stdscr.getstr(2))
                 if(not isMovingForward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going forwards
-                set_Velocity(vel*-1, vel, odrv1, odrv2, odrv3)
+                set_Velocity(vel*-1, vel, odrv1, odrv2, odrv3, False)
             
             #Move back
             elif command == curses.KEY_DOWN:
@@ -312,7 +312,7 @@ if __name__ == '__main__':
                     vel = int(stdscr.getstr(2))
                 if(not isMovingBackward(odrv1, odrv2, odrv3)):
                     stopDrive(odrv1, odrv2, odrv3) # Stop the motors if we are not already going backwards
-                set_Velocity(vel, vel*-1, odrv1, odrv2, odrv3)
+                set_Velocity(vel, vel*-1, odrv1, odrv2, odrv3, False)
             
             # Move left
             elif command == curses.KEY_LEFT:

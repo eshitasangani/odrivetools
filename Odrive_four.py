@@ -212,7 +212,7 @@ if __name__ == '__main__':
         while (1):
             command = stdscr.getch() # Wait for a command
 
-             ## LED COMMANDS
+            ## LED COMMANDS
             if command == ord('r'):
                 usb.write(b'RED')
                 print("RED SET")
